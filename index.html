@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="hi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100d24"><title>Hello Sweety</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 15%,#39245f,#17132e 48%,#100d24);color:#fff;font-family:system-ui;padding:22px}
+main{max-width:520px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center}.brand{font-size:20px;font-weight:800}.tag,.muted{color:#b9b1d4;font-size:13px}
+.badge{border:1px solid #62518b;border-radius:30px;padding:7px 10px;font-size:11px}
+.hero{text-align:center;padding:35px 0 20px}.orb{height:160px;width:160px;border-radius:50%;margin:0 auto 22px;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#ffe0f4,#ff70c8 28%,#9b7cff 62%,#40316f);box-shadow:0 0 45px #b26cff88}.orb span{font-size:54px}h1{margin:0 0 7px;font-size:29px}
+.status,.card{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:15px;margin:13px 0}.status{font-size:13px;color:#e6dcff}
+button{border:0;border-radius:13px;padding:15px;font-weight:700;font-size:15px;cursor:pointer}.row{display:flex;gap:10px}.row button{flex:1}.primary{background:linear-gradient(100deg,#ff70c8,#9b7cff);color:#170e2a}.secondary{background:#30294c;color:#eee8ff;border:1px solid #514477}
+.log{white-space:pre-wrap;min-height:75px;max-height:180px;overflow:auto;font-size:14px;line-height:1.5}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{font-size:12px;background:#30294c;border:1px solid #514477;border-radius:20px;padding:8px 10px}
+input{width:100%;margin-top:10px;background:#100d24;color:white;border:1px solid #514477;border-radius:10px;padding:13px;font-size:14px}
+.small{font-size:11px;color:#9389ad;text-align:center;margin-top:20px}
+</style></head><body><main>
+<div class="top"><div><div class="brand">♡ HELLO SWEETY</div><div class="tag">PERSONAL AI ASSISTANT</div></div><div class="badge">ANDROID BUILD 0.2</div></div>
+<section class="hero"><div class="orb"><span>♡</span></div><h1>Ji Malik!</h1><div class="muted">Main Sweety hoon. Aapki awaaz ka intezaar hai.</div><div class="status" id="status">Start Listening dabayein, phir “Hello Sweety” boliye.</div></section>
+<div class="row"><button class="primary" onclick="startVoice()">🎙 Start Listening</button><button class="secondary" onclick="stopVoice()">■ Stop</button></div>
+<section class="card"><b>Conversation</b><div class="log" id="log">Sweety: Namaste Malik! Main taiyar hoon.</div></section>
+<section class="card"><b>Try these commands</b><div class="chips" style="margin-top:12px"><span class="chip">Hello Sweety</span><span class="chip">YouTube kholo</span><span class="chip">WhatsApp kholo</span><span class="chip">Google par chai ki recipe khojo</span><span class="chip">Kitne baje hain?</span></div></section>
+<section class="card"><b>Text command test</b><input id="typed" placeholder="Command likhein"><button class="secondary" style="width:100%;margin-top:9px" onclick="sendTyped()">Command bhejo</button></section>
+<div class="small">Mic permission zaroori hai. Phone ke sensitive actions par confirmation rakhi gayi hai.</div>
+</main>
+<script>
+let awakeUntil=0;
+const $=id=>document.getElementById(id);
+function line(who,msg){$('log').textContent+=`\n${who}: ${msg}`;$('log').scrollTop=$('log').scrollHeight}
+function say(msg){line('Sweety',msg);if(window.Sweety)sweetySpeak(msg);else if('speechSynthesis'in window){let u=new SpeechSynthesisUtterance(msg);u.lang='hi-IN';speechSynthesis.speak(u)}}
+function status(s){$('status').textContent=s}
+function startVoice(){if(window.Sweety){window.Sweety.startListening();status('Mic chalu hai · “Hello Sweety” boliye')}else status('Is app ko Android APK ke roop mein chalayein.')}
+function stopVoice(){if(window.Sweety)window.Sweety.stopListening();status('Listening band hai')}
+function onHeard(text){handleCommand(text)}
+function handleCommand(raw){
+ let t=raw.toLowerCase().trim();if(!t)return;line('Aap',raw);
+ if(/hello sweety|hi sweety|hey sweety/.test(t)){awakeUntil=Date.now()+30000;say('Ji Malik, main sun rahi hoon. Bataiye kya kaam hai?');status('Sweety active hai · 30 seconds');return}
+ if(Date.now()>awakeUntil){status('Pehle Hello Sweety boliye');return}
+ if(/so jao|band karo|stop listening/.test(t)){awakeUntil=0;stopVoice();say('Ji Malik, main standby par hoon.');return}
+ if(/youtube/.test(t)){say('Ji Malik, YouTube khol rahi hoon.');if(window.Sweety)window.Sweety.openApp('youtube');return}
+ if(/whatsapp/.test(t)){say('Ji Malik, WhatsApp khol rahi hoon.');if(window.Sweety)window.Sweety.openApp('whatsapp');return}
+ if(/google|search|khojo|dhundo/.test(t)){let q=raw.replace(/hello sweety|hi sweety|hey sweety/ig,'').replace(/google par|search karo|khojo|dhundo/ig,'').trim();say('Ji Malik, search kar rahi hoon.');if(window.Sweety)window.Sweety.searchWeb(q);return}
+ if(/kitne baje|time batao|samay/.test(t)){say('Malik, abhi '+new Date().toLocaleTimeString('hi-IN',{hour:'numeric',minute:'2-digit'})+' hue hain.');return}
+ if(/tarikh|aaj kya din/.test(t)){say('Aaj '+new Date().toLocaleDateString('hi-IN',{weekday:'long',day:'numeric',month:'long'})+' hai.');return}
+ say('Malik, yeh command abhi available nahi hai. Iske liye agla feature add karenge.');
+}
+function sendTyped(){let v=$('typed').value.trim();if(v){handleCommand(v);$('typed').value=''}}
+function sweetySpeak(s){if(window.Sweety)window.Sweety.speak(s)}
+</script></body></html>
